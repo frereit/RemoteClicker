@@ -109,11 +109,6 @@ namespace RemoteClicker
             {
                 prevSlide();
             }
-            Dispatcher.BeginInvoke((Action)(() =>
-            {
-                // FIXME: i18n, MVVM
-                l_Status.Content = message;
-            }));
         }
 
         private void nextSlide()
