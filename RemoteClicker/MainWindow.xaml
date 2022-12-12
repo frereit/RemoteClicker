@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RemoteClicker"
         mc:Ignorable="d"
-        Title="RemoteClicker" Height="100" MinHeight="50" Width="800" MinWidth="460">
+        Title="RemoteClicker" Height="80" MinHeight="80" Width="800" MinWidth="460">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -15,7 +15,7 @@
         </Grid.ColumnDefinitions>
         <Label x:Name="l_Status" Content="Connecting.." Width="200" Grid.Column="0" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" />
         <TextBox x:Name="tb_SessionLink" Grid.Column="1"  HorizontalAlignment="Stretch" Margin="10, 0, 10,0" Text="" IsReadOnly="True" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-        <Button x:Name="b_Copy" Content="Copy Link" Width="100"  Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,100,0" VerticalAlignment="Center"/>
+        <Button x:Name="b_Copy" Content="Copy Link" Width="100"  Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,100,0" VerticalAlignment="Center" Click="b_Copy_Click"/>
         <Button x:Name="b_NewSession" Content="New session" Width="100"  Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Center" Click="b_NewSession_Click"/>
     </Grid>
 </Window>

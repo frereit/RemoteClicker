@@ -49,7 +49,7 @@ namespace RemoteClicker
         {
             get
             {
-                return "https://frereit.github.io/remoteclicker/?" + sessionId
+                return "https://frereit.github.io/RemoteClicker/?" + sessionId
                     + "#" + BitConverter.ToString(sessionKey).Replace("-", string.Empty);
             }
         }
@@ -218,6 +218,11 @@ namespace RemoteClicker
               {
                   l_Status.Content = "Listening!";
               }));
+        }
+
+        private void b_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(sessionLink);
         }
     }
 }
