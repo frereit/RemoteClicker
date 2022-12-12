@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Clicker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
+        type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #fff;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        /* two buttons, each taking up half of the screen, split vertically
+ one button with a big "<", the other with a big ">" */
+        button {
+            width: 48%;
+            height: 100vh;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            margin: 0;
+        }
+        svg {
+            width: 100%;
+            text-align: center;
+        }
+        #prev {
+            background-color: #ff7f50;
+        }
+        #next {
+            background-color: #7fffd4;
+        }
+
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button onclick="prev()" id="prev" class="disabled" disabled>
+        <svg viewBox="0 0 56 18">
+            <text x="50%" y="50%" text-anchor="middle">&lt;</text>
+        </svg>
+    </button>
+    <button onclick="next()" id="next" class="disabled" disabled>
+        <svg viewBox="0 0 56 18">
+            <text x="50%" y="50%" text-anchor="middle">&gt;</text>
+        </svg>
+    </button>
+
+    <script>
+        // connect to test.mosquitto.org
+        let client = new Paho.MQTT.Client("wss://broker.hivemq.com:8884/mqtt", "clickerClient");
+        function onConnect() {
+            console.log("Connected");
+            document.getElementById("prev").classList.remove("disabled");
+            document.getElementById("next").classList.remove("disabled");
+            document.getElementById("prev").disabled = false;
+            document.getElementById("next").disabled = false;
+        }
+        let session_id = window.location.search.substring(1);
+        let session_key_hex = window.location.hash.substring(1);
+        if(session_id == "" || session_key_hex == "") {
+            alert("No session ID or key provided");
+        } else {
+            client.connect({ onSuccess: onConnect });
+        }
+
+        async function encrypt(message) {
+            // encrypt the message using AES-128-GCM
+            let session_key_bytes = new Uint8Array(session_key_hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            let session_key = await window.crypto.subtle.importKey(
+                "raw",
+                session_key_bytes,
+                {
+                    name: "AES-GCM"
+                },
+                false,
+                ["encrypt"]
+            );
+            let iv = window.crypto.getRandomValues(new Uint8Array(12));
+            let encoder = new TextEncoder();
+            let data = encoder.encode(message);
+            let encrypted = await window.crypto.subtle.encrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv,
+                    tagLength: 128
+                },
+                session_key,
+                data
+            );
+            let encrypted_message = new Uint8Array(encrypted.byteLength + iv.byteLength);
+            encrypted_message.set(iv);
+            encrypted_message.set(new Uint8Array(encrypted), iv.byteLength);
+            return encrypted_message;
+        }
+
+        async function next() {
+            message = new Paho.MQTT.Message(await encrypt("next"));
+            message.destinationName = "remoteclicker/" + session_id;
+            client.send(message);
+        }
+        async function prev() {
+            message = new Paho.MQTT.Message(await encrypt("prev"));
+            message.destinationName = "remoteclicker/" + session_id;
+            client.send(message);
+        }
+    </script>
+</body>
